@@ -13,17 +13,13 @@ namespace HCCGHTCIU.Services
     {
         private readonly Dictionary<string, string> _translations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly ILogger<IspTranslationService> _logger;
+        private bool _isInitialized = false; // 標記是否已初始化
+        private readonly object _lockObject = new object(); // 用於初始化的鎖對象
 
         public IspTranslationService(ILogger<IspTranslationService> logger)
         {
             _logger = logger;
             InitializeTranslations();
-
-            // 額外的日誌，顯示所有翻譯
-            foreach (var translation in _translations)
-            {
-                _logger.LogInformation($"ISP 翻譯: {translation.Key} -> {translation.Value}");
-            }
         }
 
         /// <summary>
@@ -31,38 +27,57 @@ namespace HCCGHTCIU.Services
         /// </summary>
         private void InitializeTranslations()
         {
-            try
+            // 使用鎖確保只初始化一次
+            lock (_lockObject)
             {
-                string filePath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Data", "IspTranslations.txt");
-                if (File.Exists(filePath))
+                // 檢查是否已經初始化
+                if (_isInitialized)
+                    return;
+
+                try
                 {
-                    string[] lines = File.ReadAllLines(filePath);
-                    foreach (string line in lines)
+                    string filePath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Data", "IspTranslations.txt");
+                    if (File.Exists(filePath))
                     {
-                        if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("//"))
-                            continue;
-
-                        string[] parts = line.Split('\t');
-                        if (parts.Length >= 3 &&
-                            !string.IsNullOrWhiteSpace(parts[1]) &&
-                            !string.IsNullOrWhiteSpace(parts[2]))
+                        string[] lines = File.ReadAllLines(filePath);
+                        foreach (string line in lines)
                         {
-                            string englishName = parts[2].Trim();
-                            string chineseName = parts[1].Trim();
+                            if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("//"))
+                                continue;
 
-                            _translations[englishName] = chineseName;
+                            string[] parts = line.Split('\t');
+                            if (parts.Length >= 3 &&
+                                !string.IsNullOrWhiteSpace(parts[1]) &&
+                                !string.IsNullOrWhiteSpace(parts[2]))
+                            {
+                                string englishName = parts[2].Trim();
+                                string chineseName = parts[1].Trim();
+
+                                _translations[englishName] = chineseName;
+                            }
                         }
+                        _logger.LogInformation("已成功加載 {count} 個 ISP 翻譯", _translations.Count);
+
+                        // 僅在開發環境中輸出詳細日誌
+#if DEBUG
+                        foreach (var translation in _translations)
+                        {
+                            _logger.LogInformation($"ISP 翻譯: {translation.Key} -> {translation.Value}");
+                        }
+#endif
                     }
-                    _logger.LogInformation("已成功加載 {count} 個 ISP 翻譯", _translations.Count);
+                    else
+                    {
+                        _logger.LogWarning("找不到 ISP 翻譯檔案: {filePath}", filePath);
+                    }
+
+                    // 標記為已初始化
+                    _isInitialized = true;
                 }
-                else
+                catch (Exception ex)
                 {
-                    _logger.LogWarning("找不到 ISP 翻譯檔案: {filePath}", filePath);
+                    _logger.LogError(ex, "加載 ISP 翻譯時發生錯誤");
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "加載 ISP 翻譯時發生錯誤");
             }
         }
 

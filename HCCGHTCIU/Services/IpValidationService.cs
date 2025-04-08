@@ -1,17 +1,18 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using System.Net;
-using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace HCCGHTCIU.Services
 {
     /// <summary>
-    /// 簡化版 IP 地址驗證服務
-    /// 使用內建函數和簡化邏輯
+    /// IP 地址驗證服務
+    /// 提供 IP 地址格式驗證和分類功能
     /// </summary>
     public class IpValidationService
     {
-        private readonly ILogger<IpValidationService> _logger;
-        private readonly IMemoryCache _memoryCache;
+        private readonly ILogger<IpValidationService> _logger;    // 日誌服務
+        private readonly IMemoryCache _memoryCache;               // 記憶體快取
 
         // 快取鍵前綴
         private const string VALIDATION_CACHE_KEY = "IPValidation_";
@@ -20,28 +21,62 @@ namespace HCCGHTCIU.Services
         // 快取過期時間（分鐘）
         private const int CACHE_EXPIRATION_MINUTES = 60;
 
+        // IP 地址分類緩存
+        private readonly ConcurrentDictionary<string, bool> _validationCache = new();
+        private readonly ConcurrentDictionary<string, bool> _reservedCache = new();
+
         // 預定義的私有 IP 地址 CIDR 區段
-        private static readonly string[] PRIVATE_IP_RANGES = new[]
+        private static readonly List<(IPAddress NetworkAddress, int PrefixLength)> _privateIpRanges;
+
+        // 靜態構造函數，初始化 IP 範圍
+        static IpValidationService()
         {
-            "10.0.0.0/8",      // RFC 1918 - 私有網路
-            "172.16.0.0/12",   // RFC 1918 - 私有網路
-            "192.168.0.0/16",  // RFC 1918 - 私有網路
-            "127.0.0.0/8",     // 本地迴環
-            "169.254.0.0/16",  // 鏈接本地
-            "192.0.0.0/24",    // IETF 協議分配
-            "192.0.2.0/24",    // TEST-NET-1
-            "198.51.100.0/24", // TEST-NET-2
-            "203.0.113.0/24",  // TEST-NET-3
-            "224.0.0.0/4",     // 多播
-            "240.0.0.0/4",     // 保留
-            "100.64.0.0/10",   // 運營商 NAT
-            "::/128",          // 未指定 IPv6
-            "::1/128",         // IPv6 本地迴環
-            "fc00::/7",        // IPv6 唯一本地地址
-            "fe80::/10",       // IPv6 鏈接本地
-            "ff00::/8",        // IPv6 多播
-            "2001:db8::/32"    // IPv6 文檔前綴
-        };
+            _privateIpRanges = new List<(IPAddress, int)>();
+
+            // IPv4 範圍
+            InitializeIpRange("10.0.0.0/8");       // RFC 1918 - 私有網路
+            InitializeIpRange("172.16.0.0/12");    // RFC 1918 - 私有網路
+            InitializeIpRange("192.168.0.0/16");   // RFC 1918 - 私有網路
+            InitializeIpRange("127.0.0.0/8");      // 本地迴環
+            InitializeIpRange("169.254.0.0/16");   // 鏈接本地
+            InitializeIpRange("192.0.0.0/24");     // IETF 協議分配
+            InitializeIpRange("192.0.2.0/24");     // TEST-NET-1
+            InitializeIpRange("198.51.100.0/24");  // TEST-NET-2
+            InitializeIpRange("203.0.113.0/24");   // TEST-NET-3
+            InitializeIpRange("224.0.0.0/4");      // 多播
+            InitializeIpRange("240.0.0.0/4");      // 保留
+            InitializeIpRange("100.64.0.0/10");    // 運營商 NAT
+
+            // IPv6 範圍
+            InitializeIpRange("::/128");           // 未指定 IPv6
+            InitializeIpRange("::1/128");          // IPv6 本地迴環
+            InitializeIpRange("fc00::/7");         // IPv6 唯一本地地址
+            InitializeIpRange("fe80::/10");        // IPv6 鏈接本地
+            InitializeIpRange("ff00::/8");         // IPv6 多播
+            InitializeIpRange("2001:db8::/32");    // IPv6 文檔前綴
+        }
+
+        /// <summary>
+        /// 初始化 IP 範圍，解析 CIDR 表示法
+        /// </summary>
+        /// <param name="cidr">CIDR 表示法的 IP 範圍</param>
+        private static void InitializeIpRange(string cidr)
+        {
+            try
+            {
+                string[] parts = cidr.Split('/');
+                if (parts.Length == 2 &&
+                    IPAddress.TryParse(parts[0], out var networkAddress) &&
+                    int.TryParse(parts[1], out var prefixLength))
+                {
+                    _privateIpRanges.Add((networkAddress, prefixLength));
+                }
+            }
+            catch
+            {
+                // 解析失敗時安靜失敗，不影響其他範圍的初始化
+            }
+        }
 
         /// <summary>
         /// 構造函數
@@ -71,16 +106,27 @@ namespace HCCGHTCIU.Services
             }
 
             // 嘗試從快取中獲取結果
-            string cacheKey = $"{VALIDATION_CACHE_KEY}{ipAddress}";
-            if (_memoryCache.TryGetValue(cacheKey, out bool cachedResult))
+            if (_validationCache.TryGetValue(ipAddress, out bool cachedResult))
             {
                 return cachedResult;
+            }
+
+            // 嘗試從記憶體快取獲取
+            string cacheKey = $"{VALIDATION_CACHE_KEY}{ipAddress}";
+            if (_memoryCache.TryGetValue(cacheKey, out bool memoryCachedResult))
+            {
+                // 更新本地快取
+                _validationCache[ipAddress] = memoryCachedResult;
+                return memoryCachedResult;
             }
 
             // 使用 .NET 的 IPAddress.TryParse 方法驗證
             bool isValid = IPAddress.TryParse(ipAddress, out _);
 
-            // 存入快取
+            // 存入本地快取
+            _validationCache[ipAddress] = isValid;
+
+            // 存入記憶體快取
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromMinutes(CACHE_EXPIRATION_MINUTES))
                 .SetPriority(CacheItemPriority.High);
@@ -140,10 +186,18 @@ namespace HCCGHTCIU.Services
         /// <returns>是否為保留或特殊地址</returns>
         public bool IsReservedOrSpecialIp(string ipAddress)
         {
-            // 嘗試從快取中獲取結果
+            // 嘗試從本地快取獲取結果
+            if (_reservedCache.TryGetValue(ipAddress, out bool localCachedResult))
+            {
+                return localCachedResult;
+            }
+
+            // 嘗試從記憶體快取獲取結果
             string cacheKey = $"{RESERVED_CACHE_KEY}{ipAddress}";
             if (_memoryCache.TryGetValue(cacheKey, out bool cachedResult))
             {
+                // 更新本地快取
+                _reservedCache[ipAddress] = cachedResult;
                 return cachedResult;
             }
 
@@ -151,81 +205,95 @@ namespace HCCGHTCIU.Services
             if (!IsValidIpAddress(ipAddress))
             {
                 // 無效的 IP 地址視為特殊地址
-                _memoryCache.Set(cacheKey, true, TimeSpan.FromMinutes(CACHE_EXPIRATION_MINUTES));
+                StoreReservedIpResult(ipAddress, true);
                 return true;
             }
 
             IPAddress ip = IPAddress.Parse(ipAddress);
-            bool isReserved = false;
+            bool isReserved = CheckIfIpIsInPrivateRanges(ip);
 
-            // 檢查是否為保留地址
-            foreach (var range in PRIVATE_IP_RANGES)
-            {
-                try
-                {
-                    // 解析 CIDR 表示法
-                    string[] parts = range.Split('/');
-                    IPAddress networkAddress = IPAddress.Parse(parts[0]);
-                    int prefixLength = int.Parse(parts[1]);
+            // 存儲結果到快取
+            StoreReservedIpResult(ipAddress, isReserved);
 
-                    // 檢查 IP 地址族是否匹配
-                    if (ip.AddressFamily != networkAddress.AddressFamily)
-                        continue;
+            return isReserved;
+        }
 
-                    // 使用基本的 CIDR 驗證邏輯
-                    if (IsIpInRange(ip, networkAddress, prefixLength))
-                    {
-                        isReserved = true;
-                        _logger.LogInformation("檢測到保留 IP 地址: {ipAddress} 在範圍 {range}", ipAddress, range);
-                        break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "檢查 IP 範圍時發生錯誤: {range}", range);
-                }
-            }
+        /// <summary>
+        /// 儲存保留 IP 檢查結果到快取
+        /// </summary>
+        /// <param name="ipAddress">IP 地址</param>
+        /// <param name="isReserved">是否為保留 IP</param>
+        private void StoreReservedIpResult(string ipAddress, bool isReserved)
+        {
+            // 更新本地快取
+            _reservedCache[ipAddress] = isReserved;
 
-            // 存入快取
+            // 存入記憶體快取
+            string cacheKey = $"{RESERVED_CACHE_KEY}{ipAddress}";
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromMinutes(CACHE_EXPIRATION_MINUTES))
                 .SetPriority(CacheItemPriority.High);
 
             _memoryCache.Set(cacheKey, isReserved, cacheEntryOptions);
 
-            return isReserved;
+            if (isReserved)
+            {
+                _logger.LogInformation("檢測到保留 IP 地址: {ipAddress}", ipAddress);
+            }
+        }
+
+        /// <summary>
+        /// 檢查 IP 地址是否在預定義的私有範圍內
+        /// </summary>
+        /// <param name="ip">IP 地址</param>
+        /// <returns>是否在私有範圍內</returns>
+        private bool CheckIfIpIsInPrivateRanges(IPAddress ip)
+        {
+            byte[] ipBytes = ip.GetAddressBytes();
+
+            // 檢查每個預定義範圍
+            foreach (var (networkAddress, prefixLength) in _privateIpRanges)
+            {
+                // 檢查 IP 地址族是否匹配
+                if (ip.AddressFamily != networkAddress.AddressFamily)
+                    continue;
+
+                // 檢查是否在範圍內
+                if (IsIpInRange(ipBytes, networkAddress.GetAddressBytes(), prefixLength))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
         /// 檢查 IP 是否在指定範圍內
         /// </summary>
-        /// <param name="ip">IP 地址</param>
-        /// <param name="networkAddress">網路地址</param>
+        /// <param name="ipBytes">IP 地址位元組</param>
+        /// <param name="networkBytes">網路地址位元組</param>
         /// <param name="prefixLength">前綴長度</param>
         /// <returns>是否在範圍內</returns>
-        private bool IsIpInRange(IPAddress ip, IPAddress networkAddress, int prefixLength)
+        private bool IsIpInRange(byte[] ipBytes, byte[] networkBytes, int prefixLength)
         {
-            byte[] ipBytes = ip.GetAddressBytes();
-            byte[] networkBytes = networkAddress.GetAddressBytes();
-
-            // 檢查 IP 地址族是否匹配
+            // 檢查位元組長度是否匹配
             if (ipBytes.Length != networkBytes.Length)
                 return false;
 
             // 計算網路遮罩
-            int byteCount = ipBytes.Length;
             int fullBytes = prefixLength / 8;
             int remainingBits = prefixLength % 8;
 
             // 檢查完整的字節
-            for (int i = 0; i < fullBytes; i++)
+            for (int i = 0; i < fullBytes && i < ipBytes.Length; i++)
             {
                 if (ipBytes[i] != networkBytes[i])
                     return false;
             }
 
             // 檢查剩餘的位
-            if (remainingBits > 0 && fullBytes < byteCount)
+            if (remainingBits > 0 && fullBytes < ipBytes.Length)
             {
                 byte mask = (byte)(0xFF << (8 - remainingBits));
                 if ((ipBytes[fullBytes] & mask) != (networkBytes[fullBytes] & mask))
@@ -254,21 +322,32 @@ namespace HCCGHTCIU.Services
 
             if (IsReservedOrSpecialIp(ipAddress))
             {
-                if (IsIPv4(ipAddress))
-                {
-                    return $"'{ipAddress}' 是保留的 IPv4 地址或特殊地址，無法查詢";
-                }
-                else if (IsIPv6(ipAddress))
-                {
-                    return $"'{ipAddress}' 是保留的 IPv6 地址或特殊地址，無法查詢";
-                }
-                else
-                {
-                    return $"'{ipAddress}' 是保留地址或特殊地址，無法查詢";
-                }
+                string ipType = DetermineIpType(ipAddress);
+                return $"'{ipAddress}' 是{ipType}，無法查詢";
             }
 
             return "無效的 IP 地址";
+        }
+
+        /// <summary>
+        /// 確定 IP 地址的類型描述
+        /// </summary>
+        /// <param name="ipAddress">IP 地址</param>
+        /// <returns>IP 類型描述</returns>
+        private string DetermineIpType(string ipAddress)
+        {
+            if (IsIPv4(ipAddress))
+            {
+                return "保留的 IPv4 地址或特殊地址";
+            }
+            else if (IsIPv6(ipAddress))
+            {
+                return "保留的 IPv6 地址或特殊地址";
+            }
+            else
+            {
+                return "保留地址或特殊地址";
+            }
         }
 
         /// <summary>
@@ -291,8 +370,10 @@ namespace HCCGHTCIU.Services
         /// </summary>
         public void ClearCache()
         {
-            // 由於無法直接列舉 IMemoryCache 中的所有鍵
-            // 因此這裡只清除兩個已知類型的快取
+            // 清除本地快取
+            _validationCache.Clear();
+            _reservedCache.Clear();
+
             _logger.LogInformation("已清除 IP 驗證快取");
         }
     }

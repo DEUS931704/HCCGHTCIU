@@ -6,16 +6,16 @@ using Microsoft.EntityFrameworkCore;
 namespace HCCGHTCIU.Services
 {
     /// <summary>
-    /// IP 查詢服務
+    /// IP 查詢協調服務
     /// 處理所有與 IP 查詢相關的業務邏輯
     /// </summary>
     public class IpQueryService
     {
-        private readonly ApplicationDbContext _context; // 數據庫上下文
-        private readonly ILogger<IpQueryService> _logger; // 日誌服務
-        private readonly IpLookupService _ipLookupService; // IP 查詢服務
+        private readonly ApplicationDbContext _context;         // 數據庫上下文
+        private readonly ILogger<IpQueryService> _logger;       // 日誌服務
+        private readonly IpLookupService _ipLookupService;      // IP 查詢服務
         private readonly IpValidationService _ipValidationService; // IP 驗證服務
-        private readonly CacheService _cacheService; // 快取服務
+        private readonly CacheService _cacheService;            // 快取服務
         private readonly IHttpContextAccessor _httpContextAccessor; // HTTP 上下文訪問器
 
         /// <summary>
@@ -45,27 +45,10 @@ namespace HCCGHTCIU.Services
         public async Task<IpLookupResult> LookupIpAsync(string ipAddress)
         {
             // 如果 IP 為空，使用用戶當前 IP
-            if (string.IsNullOrEmpty(ipAddress))
-            {
-                ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
-                _logger.LogInformation($"使用用戶當前 IP: {ipAddress}");
-            }
+            ipAddress = ResolveIpAddress(ipAddress);
 
             // 驗證 IP 格式
-            if (!_ipValidationService.IsValidIpAddress(ipAddress))
-            {
-                string errorMessage = _ipValidationService.GetInvalidIpErrorMessage(ipAddress);
-                _logger.LogWarning($"無效的 IP 格式: {ipAddress}");
-                throw new ArgumentException(errorMessage);
-            }
-
-            // 檢查是否為保留 IP
-            if (_ipValidationService.IsReservedOrSpecialIp(ipAddress))
-            {
-                string errorMessage = $"'{ipAddress}' 是保留或特殊 IP 地址，無法查詢";
-                _logger.LogWarning(errorMessage);
-                throw new InvalidOperationException(errorMessage);
-            }
+            ValidateIpAddress(ipAddress);
 
             try
             {
@@ -85,6 +68,44 @@ namespace HCCGHTCIU.Services
         }
 
         /// <summary>
+        /// 解析 IP 地址，如果為空則使用當前用戶的 IP
+        /// </summary>
+        /// <param name="ipAddress">提供的 IP 地址</param>
+        /// <returns>解析後的 IP 地址</returns>
+        private string ResolveIpAddress(string ipAddress)
+        {
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                _logger.LogInformation($"使用用戶當前 IP: {ipAddress}");
+            }
+            return ipAddress;
+        }
+
+        /// <summary>
+        /// 驗證 IP 地址格式和類型
+        /// </summary>
+        /// <param name="ipAddress">要驗證的 IP 地址</param>
+        private void ValidateIpAddress(string ipAddress)
+        {
+            // 驗證 IP 格式
+            if (!_ipValidationService.IsValidIpAddress(ipAddress))
+            {
+                string errorMessage = _ipValidationService.GetInvalidIpErrorMessage(ipAddress);
+                _logger.LogWarning($"無效的 IP 格式: {ipAddress}");
+                throw new ArgumentException(errorMessage);
+            }
+
+            // 檢查是否為保留 IP
+            if (_ipValidationService.IsReservedOrSpecialIp(ipAddress))
+            {
+                string errorMessage = $"'{ipAddress}' 是保留或特殊 IP 地址，無法查詢";
+                _logger.LogWarning(errorMessage);
+                throw new InvalidOperationException(errorMessage);
+            }
+        }
+
+        /// <summary>
         /// 獲取查詢日誌
         /// </summary>
         /// <param name="page">頁碼</param>
@@ -96,22 +117,33 @@ namespace HCCGHTCIU.Services
             string cacheKey = $"QueryLogs_Page{page}_Size{pageSize}";
             return await _cacheService.GetOrCreateAsync(cacheKey, async () =>
             {
-                // 計算總記錄數和總頁數
-                int totalLogs = await _context.QueryLogs.CountAsync();
-                int totalPages = (int)Math.Ceiling(totalLogs / (double)pageSize);
-
-                // 調整頁碼範圍
-                page = Math.Max(1, Math.Min(page, totalPages > 0 ? totalPages : 1));
-
-                // 獲取當前頁的記錄
-                var logs = await _context.QueryLogs
-                    .OrderByDescending(l => l.QueryTime)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
-
-                return (logs, totalPages, totalLogs);
+                return await FetchPaginatedLogsAsync(page, pageSize);
             }, TimeSpan.FromMinutes(1)); // 快取 1 分鐘
+        }
+
+        /// <summary>
+        /// 獲取分頁查詢日誌
+        /// </summary>
+        /// <param name="page">頁碼</param>
+        /// <param name="pageSize">每頁記錄數</param>
+        /// <returns>日誌列表和分頁信息</returns>
+        private async Task<(List<QueryLog> Logs, int TotalPages, int TotalCount)> FetchPaginatedLogsAsync(int page, int pageSize)
+        {
+            // 計算總記錄數和總頁數
+            int totalLogs = await _context.QueryLogs.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalLogs / (double)pageSize);
+
+            // 調整頁碼範圍
+            page = Math.Max(1, Math.Min(page, totalPages > 0 ? totalPages : 1));
+
+            // 獲取當前頁的記錄
+            var logs = await _context.QueryLogs
+                .OrderByDescending(l => l.QueryTime)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (logs, totalPages, totalLogs);
         }
 
         /// <summary>
@@ -146,17 +178,7 @@ namespace HCCGHTCIU.Services
         {
             try
             {
-                var httpContext = _httpContextAccessor.HttpContext;
-                string userIpAddress = httpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
-
-                var queryLog = new QueryLog
-                {
-                    UserIpAddress = userIpAddress,
-                    QueriedIpAddress = queriedIpAddress,
-                    QueryTime = DateTime.UtcNow.AddHours(8), // UTC+8
-                    UserAgent = httpContext?.Request.Headers.UserAgent.ToString() ?? "",
-                    Referrer = httpContext?.Request.Headers.Referer.ToString() ?? ""
-                };
+                var queryLog = CreateQueryLogEntry(queriedIpAddress);
 
                 _context.QueryLogs.Add(queryLog);
                 await _context.SaveChangesAsync();
@@ -169,6 +191,26 @@ namespace HCCGHTCIU.Services
                 _logger.LogError(ex, $"記錄查詢日誌時發生錯誤: {queriedIpAddress}");
                 // 不拋出異常，避免影響主要功能
             }
+        }
+
+        /// <summary>
+        /// 創建查詢日誌條目
+        /// </summary>
+        /// <param name="queriedIpAddress">被查詢的IP地址</param>
+        /// <returns>查詢日誌對象</returns>
+        private QueryLog CreateQueryLogEntry(string queriedIpAddress)
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            string userIpAddress = httpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            return new QueryLog
+            {
+                UserIpAddress = userIpAddress,
+                QueriedIpAddress = queriedIpAddress,
+                QueryTime = DateTime.UtcNow.AddHours(8), // UTC+8
+                UserAgent = httpContext?.Request.Headers.UserAgent.ToString() ?? "",
+                Referrer = httpContext?.Request.Headers.Referer.ToString() ?? ""
+            };
         }
 
         /// <summary>

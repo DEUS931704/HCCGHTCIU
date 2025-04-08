@@ -12,16 +12,16 @@ namespace HCCGHTCIU.Services
 {
     /// <summary>
     /// IP 查詢服務
-    /// 簡化版本，合併了原先的多層結構
+    /// 提供 IP 查詢、分析和儲存功能
     /// </summary>
     public class IpLookupService
     {
-        private readonly ApplicationDbContext _context; // 資料庫上下文
-        private readonly ILogger<IpLookupService> _logger; // 日誌服務
-        private readonly CacheService _cacheService; // 快取服務
+        private readonly ApplicationDbContext _context;           // 資料庫上下文
+        private readonly ILogger<IpLookupService> _logger;       // 日誌服務
+        private readonly CacheService _cacheService;             // 快取服務
         private readonly IspTranslationService _ispTranslationService; // ISP 翻譯服務
-        private readonly HttpClient _httpClient; // HTTP 客戶端
-        private readonly string _apiKey; // API 金鑰
+        private readonly HttpClient _httpClient;                 // HTTP 客戶端
+        private readonly string _apiKey;                         // API 金鑰
         private readonly IpValidationService _ipValidationService; // IP 驗證服務
 
         // API 請求超時設置
@@ -42,6 +42,7 @@ namespace HCCGHTCIU.Services
             IConfiguration configuration,
             IpValidationService ipValidationService)
         {
+            // 初始化依賴項
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
@@ -49,16 +50,16 @@ namespace HCCGHTCIU.Services
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _ipValidationService = ipValidationService ?? throw new ArgumentNullException(nameof(ipValidationService));
 
-            // 從配置獲取 API 金鑰（使用 IConfiguration）
+            // 從配置獲取 API 金鑰
             _apiKey = configuration["IPQualityScore:ApiKey"] ??
                 throw new ArgumentNullException("IPQualityScore API key not found in configuration");
 
             // 配置 JSON 序列化選項
             _jsonOptions = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true,
-                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
-                WriteIndented = false
+                PropertyNameCaseInsensitive = true,               // 屬性名稱不區分大小寫
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull, // 忽略空值
+                WriteIndented = false                             // 不格式化輸出，減少大小
             };
 
             // 配置 HTTP 客戶端

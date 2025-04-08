@@ -88,9 +88,13 @@ namespace HCCGHTCIU.Data
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             // 添加審計追蹤
-            var entries = ChangeTracker.Entries().Where(e =>
-                (e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
-                e.Entity.GetType() != typeof(AuditLog));
+            // 使用 ToList() 創建一個集合的副本進行操作，避免在枚舉期間修改集合
+            var entries = ChangeTracker.Entries()
+                .Where(e => (e.State == EntityState.Added ||
+                             e.State == EntityState.Modified ||
+                             e.State == EntityState.Deleted) &&
+                            e.Entity.GetType() != typeof(AuditLog))
+                .ToList();  // 使用 ToList() 創建副本
 
             foreach (var entry in entries)
             {
@@ -130,7 +134,7 @@ namespace HCCGHTCIU.Data
                         ? System.Text.Json.JsonSerializer.Serialize(GetCurrentValues(entry))
                         : null
                 });
-                AuditLogs.Add(new AuditLog { /* ... */ });
+
             }
 
             return base.SaveChangesAsync(cancellationToken);
