@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "管理頁面"; // 設置頁面標題
+}
+
+<div class="container mt-4">
+    <h2>管理頁面</h2> <!-- 主標題 -->
+    <!-- 警告提示 -->
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        警告：這些操作會影響資料庫中的數據，請謹慎使用。
+    </div>
+
+    <!-- 成功訊息顯示 -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- 錯誤訊息顯示 -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-x-circle-fill me-2"></i>
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- 數據管理卡片 -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">數據管理</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- 清除測試數據表單 -->
+                    <form method="post" asp-action="ClearTestData" onsubmit="return confirm('確定要清除所有測試資料嗎？此操作無法撤銷。');">
+                        <!-- 反CSRF令牌 -->
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit" class="btn btn-danger mb-3">
+                            <i class="bi bi-trash-fill me-1"></i>
+                            清除所有測試資料
+                        </button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <!-- 查看查詢日誌按鈕 -->
+                    <a asp-action="QueryLogs" class="btn btn-primary mb-3">
+                        <i class="bi bi-journal-text me-1"></i>
+                        查看查詢日誌 <span class="badge bg-light text-dark ms-1">@ViewBag.LogCount</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系統狀態卡片 -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">系統狀態</h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <!-- 顯示記錄數量 -->
+                <dt class="col-sm-3">IP資料庫記錄數量</dt>
+                <dd class="col-sm-9">@ViewBag.RecordCount 條</dd>
+
+                <!-- 顯示查詢日誌數量 -->
+                <dt class="col-sm-3">查詢日誌數量</dt>
+                <dd class="col-sm-9">@ViewBag.LogCount 條</dd>
+
+                <!-- 顯示啟動時間 -->
+                <dt class="col-sm-3">系統啟動時間</dt>
+                <dd class="col-sm-9">@ViewBag.StartupTime</dd>
+
+                <!-- 顯示服務狀態 -->
+                <dt class="col-sm-3">服務狀態</dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-success">正常運行中</span>
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <!-- 底部操作區域 -->
+    <div class="d-flex justify-content-between">
+        <!-- 返回首頁按鈕 -->
+        <a asp-action="Index" class="btn btn-primary">
+            <i class="bi bi-arrow-left me-1"></i>
+            返回首頁
+        </a>
+
+        <!-- 登出按鈕 -->
+        <form method="post" asp-action="Logout">
+            <!-- 反CSRF令牌 -->
+            @Html.AntiForgeryToken()
+
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-box-arrow-right me-1"></i>
+                登出管理員
+            </button>
+        </form>
+    </div>
+</div>

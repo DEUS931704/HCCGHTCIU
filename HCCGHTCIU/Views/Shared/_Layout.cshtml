@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - 鏈上刑警</title>
+
+    <!-- 引用 Google Fonts 思源宋體，作為首選字體源 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- 引用 Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- 引用 Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <!-- 引用自定義 CSS -->
+    <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" /> <!-- 本地字體作為備用 -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/HCCGHTCIU.styles.css" asp-append-version="true" />
+
+    <!-- 字體加載檢測腳本 -->
+    <script>
+        // 檢測字體是否成功加載
+        document.addEventListener('DOMContentLoaded', function () {
+            // 嘗試檢測 Noto Serif TC 字體是否成功加載
+            var isFontLoaded = false;
+            try {
+                // 創建一個測試元素
+                var testElement = document.createElement('span');
+                testElement.style.fontFamily = 'Noto Serif TC, serif';
+                testElement.style.position = 'absolute';
+                testElement.style.visibility = 'hidden';
+                testElement.textContent = '測試文字';
+                document.body.appendChild(testElement);
+
+                // 檢查字體是否加載
+                var width = testElement.offsetWidth;
+                testElement.style.fontFamily = 'serif';
+                isFontLoaded = width !== testElement.offsetWidth;
+                document.body.removeChild(testElement);
+
+                // 如果字體未能加載，添加回退類
+                if (!isFontLoaded) {
+                    document.documentElement.classList.add('font-fallback');
+                    console.log('Google Fonts 加載失敗，已啟用本地字體備用方案');
+                }
+            } catch (e) {
+                console.error('字體檢測失敗', e);
+            }
+        });
+    </script>
+</head>
+<body>
+    <header>
+        @{
+            // 檢查是否已登入
+            bool isLoggedIn = Context.Session.GetInt32("UserId").HasValue;
+            string userRole = Context.Session.GetString("UserRole") ?? "";
+            bool isAdmin = userRole == "Admin";
+        }
+
+        <!-- 導航欄 -->
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <!-- 網站標誌 -->
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-shield-fill-check me-1"></i>
+                    鏈上刑警
+                </a>
+
+                <!-- 響應式導航按鈕 -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- 導航菜單 -->
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        @if (isLoggedIn)
+                        {
+                            <!-- 已登入用戶顯示的導航項 -->
+                            if (isAdmin)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-controller="Home" asp-action="AdminDashboard">
+                                        <i class="bi bi-speedometer2 me-1"></i>儀表板
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-controller="Home" asp-action="UserDashboard">
+                                        <i class="bi bi-speedometer2 me-1"></i>儀表板
+                                    </a>
+                                </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Home" asp-action="IpLookup">
+                                    <i class="bi bi-search me-1"></i>IP查詢
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Home" asp-action="Blockchain">
+                                    <i class="bi bi-currency-bitcoin me-1"></i>區塊鏈
+                                </a>
+                            </li>
+                            @if (isAdmin)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-controller="Home" asp-action="ManageUsers">
+                                        <i class="bi bi-people-fill me-1"></i>用戶管理
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-controller="Home" asp-action="QueryLogs">
+                                        <i class="bi bi-journal-text me-1"></i>查詢日誌
+                                    </a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <!-- 未登入用戶顯示的導航項 -->
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Home" asp-action="Index">
+                                    <i class="bi bi-house-door-fill me-1"></i>首頁
+                                </a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-controller="Home" asp-action="Privacy">
+                                <i class="bi bi-shield-lock-fill me-1"></i>隱私
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- 右側用戶信息 -->
+                    @if (isLoggedIn)
+                    {
+                        <div class="navbar-text text-light me-3 d-none d-md-block">
+                            <i class="bi bi-person-fill me-1"></i>
+                            歡迎，
+                            @if (isAdmin)
+                            {
+                                <span class="badge bg-danger">管理員</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">用戶</span>
+                            }
+                        </div>
+                        <form asp-action="Logout" asp-controller="Home" method="post" class="d-none d-md-block">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-light">
+                                <i class="bi bi-box-arrow-right me-1"></i>登出
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 主要內容區域 -->
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody() <!-- 渲染頁面內容 -->
+        </main>
+    </div>
+
+    <!-- 頁腳 -->
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    &copy; 2025 鏈上刑警 -
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy">隱私政策</a>
+                </div>
+                <div class="col-md-6 text-end">
+                    <small>新竹市警察局網路犯罪調查小組</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript 引用 -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false) <!-- 渲染腳本區塊 -->
+</body>
+</html>

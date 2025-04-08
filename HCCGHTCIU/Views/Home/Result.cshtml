@@ -1,0 +1,97 @@
+﻿@model HCCGHTCIU.Models.IpLookupResult
+<!-- 使用 IpLookupResult 模型 -->
+@{
+    ViewData["Title"] = $"IP查詢結果: {Model.IpAddress}"; // 動態設置頁面標題
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">IP查詢結果</h2> <!-- 主標題 -->
+    <!-- 結果卡片 -->
+    <div class="card mb-4">
+        <!-- 卡片標頭：顯示IP地址和威脅等級 -->
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">@Model.IpAddress</h3>
+            <!-- 威脅等級徽章，根據等級變化顏色 -->
+            <span class="badge @(Model.ThreatLevel > 7 ? "bg-danger" : Model.ThreatLevel > 4 ? "bg-warning" : "bg-success")">
+                威脅程度: @Model.ThreatLevel/10
+            </span>
+        </div>
+
+        <!-- 卡片內容：顯示詳細資訊 -->
+        <div class="card-body">
+            <div class="row">
+                <!-- 左側資訊列表 -->
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>ISP名稱:</strong>
+                            @if (Model.IspName.Contains("(emome)"))
+                            {
+                                <span>@Model.IspName.Replace("(emome)", "") <span class="badge bg-info">emome</span></span>
+                            }
+                            else if (Model.IspName.Contains("(hinet)"))
+                            {
+                                <span>@Model.IspName.Replace("(hinet)", "") <span class="badge bg-primary">hinet</span></span>
+                            }
+                            else
+                            {
+                                <span>@Model.IspName</span>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.IspNameEnglish) && Model.IspName != Model.IspNameEnglish)
+                            {
+                                <div class="small text-muted mt-1">@Model.IspNameEnglish</div>
+                            }
+                        </li>
+                        <li class="list-group-item">
+                            <strong>國家/地區:</strong> @Model.Country
+                        </li>
+                        <li class="list-group-item">
+                            <strong>城市:</strong> @Model.City
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 右側資訊列表 -->
+                <div class="col-md-6">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>VPN狀態:</strong>
+                            @if (Model.IsVpn)
+                            {
+                                <span class="text-danger">是</span>
+                                <span class="d-block mt-1">
+                                    <strong>VPN服務商:</strong> @Model.VpnProvider
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-success">否</span>
+                            }
+                        </li>
+                        <li class="list-group-item">
+                            <strong>被查詢次數:</strong> @Model.QueryCount
+                        </li>
+                        <li class="list-group-item">
+                            <strong>上次查詢時間:</strong> @Model.LastQueried.ToString("yyyy-MM-dd HH:mm:ss")
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作按鈕和警告 -->
+    <div class="d-flex justify-content-between">
+        <!-- 返回查詢按鈕 -->
+        <a asp-action="IpLookup" class="btn btn-primary">返回查詢</a>
+
+        <!-- 高威脅等級警告 -->
+        @if (Model.ThreatLevel > 5)
+        {
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                這個IP地址有較高的威脅評分，可能存在潛在風險。
+            </div>
+        }
+    </div>
+</div>

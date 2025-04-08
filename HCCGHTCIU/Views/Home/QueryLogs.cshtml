@@ -1,0 +1,169 @@
+﻿@model List<HCCGHTCIU.Models.QueryLog>
+@{
+    ViewData["Title"] = "查詢日誌";
+
+    // 獲取分頁資訊
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+    int totalLogs = ViewBag.TotalLogs;
+    int pageSize = ViewBag.PageSize;
+}
+
+<div class="container mt-4">
+    <h2>查詢日誌</h2>
+
+    <!-- 頁面說明 -->
+    <div class="alert alert-info mb-4">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        此頁面顯示所有用戶進行的IP查詢記錄，包括用戶IP、查詢的IP以及查詢時間（UTC+8）。
+    </div>
+
+    <!-- 查詢記錄表格 -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">查詢記錄列表</h5>
+                <span class="badge bg-primary">共 @totalLogs 條記錄</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>用戶IP</th>
+                            <th>查詢IP</th>
+                            <th>查詢時間 (UTC+8)</th>
+                            <th>瀏覽器信息</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            @foreach (var log in Model)
+                            {
+                                <tr>
+                                    <td>@log.Id</td>
+                                    <td>@log.UserIpAddress</td>
+                                    <td>@log.QueriedIpAddress</td>
+                                    <td>@log.QueryTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 200px;"
+                                              title="@log.UserAgent">@log.UserAgent</span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center">目前沒有查詢記錄</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 分頁控制 -->
+        @if (totalPages > 1)
+        {
+            <div class="card-footer">
+                <nav aria-label="查詢記錄分頁">
+                    <ul class="pagination justify-content-center mb-0">
+                        <!-- 上一頁按鈕 -->
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("QueryLogs", new { page = currentPage - 1 })" aria-label="上一頁">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        <!-- 分頁數字 -->
+                        @{
+                            // 最多顯示5個頁碼
+                            int startPage = Math.Max(1, currentPage - 2);
+                            int endPage = Math.Min(totalPages, startPage + 4);
+
+                            // 調整startPage，確保顯示5個頁碼
+                            if (endPage - startPage < 4)
+                            {
+                                startPage = Math.Max(1, endPage - 4);
+                            }
+                        }
+
+                        @if (startPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("QueryLogs", new { page = 1 })">1</a>
+                            </li>
+                            @if (startPage > 2)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                        }
+
+                        @for (int i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("QueryLogs", new { page = i })">@i</a>
+                            </li>
+                        }
+
+                        @if (endPage < totalPages)
+                        {
+                            @if (endPage < totalPages - 1)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("QueryLogs", new { page = totalPages })">@totalPages</a>
+                            </li>
+                        }
+
+                        <!-- 下一頁按鈕 -->
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("QueryLogs", new { page = currentPage + 1 })" aria-label="下一頁">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+
+    <!-- 分頁信息 -->
+    @if (totalPages > 1)
+    {
+        <div class="text-center mt-2 text-muted">
+            <small>
+                顯示第 @((currentPage - 1) * pageSize + 1) 至
+                @(Math.Min(currentPage * pageSize, totalLogs)) 條記錄，共 @totalLogs 條
+            </small>
+        </div>
+    }
+
+    <!-- 底部操作按鈕 -->
+    <div class="d-flex justify-content-between mt-4">
+        <a asp-action="Admin" class="btn btn-primary">
+            <i class="bi bi-arrow-left me-1"></i>
+            返回管理頁面
+        </a>
+
+        <!-- 清除日誌表單 -->
+        <form method="post" asp-action="ClearQueryLogs" onsubmit="return confirm('確定要清除所有查詢記錄嗎？此操作無法撤銷。');">
+            <!-- 反CSRF令牌 -->
+            @Html.AntiForgeryToken()
+
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash-fill me-1"></i>
+                清除所有查詢記錄
+            </button>
+        </form>
+    </div>
+</div>

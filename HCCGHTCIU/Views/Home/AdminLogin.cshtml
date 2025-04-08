@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "管理員登入";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">管理員登入</h4>
+            </div>
+            <div class="card-body">
+                <!-- 顯示登入錯誤訊息 -->
+                @if (TempData["LoginError"] != null)
+                {
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        @TempData["LoginError"]
+                    </div>
+                }
+
+                <form asp-action="AdminAuth" method="post">
+                    <!-- 反CSRF令牌 -->
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">帳號</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">密碼</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>
+                            登入
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light">
+                <small class="text-muted">請輸入您的管理員憑證以訪問系統管理功能。</small>
+            </div>
+        </div>
+
+        <!-- 返回首頁連結 -->
+        <div class="text-center mt-3">
+            <a href="@Url.Action("Index", "Home")" class="text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i> 返回首頁
+            </a>
+        </div>
+    </div>
+</div>

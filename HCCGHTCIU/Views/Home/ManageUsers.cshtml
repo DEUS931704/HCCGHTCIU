@@ -1,0 +1,132 @@
+﻿@model List<HCCGHTCIU.Models.User>
+@{
+    ViewData["Title"] = "用戶管理";
+}
+
+<div class="container mt-4">
+    <h1 class="display-4 mb-4">用戶管理</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">新增用戶</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="AddUser" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="username" class="form-label">用戶名</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="password" class="form-label">密碼</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="role" class="form-label">角色</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="1">一般用戶</option>
+                            <option value="2">管理員</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-person-plus-fill me-1"></i>
+                    新增用戶
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">用戶列表</h5>
+            <span class="badge bg-light text-dark">共 @Model.Count 個用戶</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>用戶名</th>
+                            <th>角色</th>
+                            <th>創建時間</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            // 獲取當前登入用戶 ID
+                            int? currentUserId = Context.Session.GetInt32("UserId");
+                        }
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.Id</td>
+                                <td>@user.Username</td>
+                                <td>
+                                    @if (user.Role == HCCGHTCIU.Models.UserRole.Admin)
+                                    {
+                                        <span class="badge bg-danger">管理員</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">一般用戶</span>
+                                    }
+                                </td>
+                                <td>@user.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                <td>
+                                    @if (user.Id != currentUserId)
+                                    {
+                                        <form asp-action="DeleteUser" method="post" class="d-inline"
+                                              onsubmit="return confirm('確定要刪除用戶 @user.Username 嗎？此操作無法撤銷。');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@user.Id">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-trash-fill"></i>
+                                                刪除
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-secondary btn-sm" disabled title="不能刪除當前登入的用戶">
+                                            <i class="bi bi-trash-fill"></i>
+                                            刪除
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="AdminDashboard" class="btn btn-primary">
+            <i class="bi bi-arrow-left me-1"></i>
+            返回儀表板
+        </a>
+    </div>
+</div>

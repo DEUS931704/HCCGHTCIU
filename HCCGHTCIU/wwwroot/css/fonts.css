@@ -1,0 +1,145 @@
+/* 本地思源宋體字體定義 */
+@font-face {
+    font-family: 'Source Han Serif TC';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Source Han Serif TC Regular'), url('../fonts/SourceHanSerifTC-Regular.otf') format('opentype'), url('../fonts/NotoSerifTC-Regular.otf') format('opentype');
+    font-display: swap; /* 提高性能，減少FOIT（無樣式文本閃爍） */
+}
+
+@font-face {
+    font-family: 'Source Han Serif TC';
+    font-style: normal;
+    font-weight: 500;
+    src: local('Source Han Serif TC Medium'), url('../fonts/SourceHanSerifTC-Medium.otf') format('opentype'), url('../fonts/NotoSerifTC-Medium.otf') format('opentype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Source Han Serif TC';
+    font-style: normal;
+    font-weight: 600;
+    src: local('Source Han Serif TC SemiBold'), url('../fonts/SourceHanSerifTC-SemiBold.otf') format('opentype'), url('../fonts/NotoSerifTC-SemiBold.otf') format('opentype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Source Han Serif TC';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Source Han Serif TC Bold'), url('../fonts/SourceHanSerifTC-Bold.otf') format('opentype'), url('../fonts/NotoSerifTC-Bold.otf') format('opentype');
+    font-display: swap;
+}
+
+/* 思源宋體的Noto Serif TC別名 */
+@font-face {
+    font-family: 'Noto Serif TC';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Noto Serif TC Regular'), local('Source Han Serif TC Regular'), url('../fonts/NotoSerifTC-Regular.otf') format('opentype'), url('../fonts/SourceHanSerifTC-Regular.otf') format('opentype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Serif TC';
+    font-style: normal;
+    font-weight: 500;
+    src: local('Noto Serif TC Medium'), local('Source Han Serif TC Medium'), url('../fonts/NotoSerifTC-Medium.otf') format('opentype'), url('../fonts/SourceHanSerifTC-Medium.otf') format('opentype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Serif TC';
+    font-style: normal;
+    font-weight: 600;
+    src: local('Noto Serif TC SemiBold'), local('Source Han Serif TC SemiBold'), url('../fonts/NotoSerifTC-SemiBold.otf') format('opentype'), url('../fonts/SourceHanSerifTC-SemiBold.otf') format('opentype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Serif TC';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Noto Serif TC Bold'), local('Source Han Serif TC Bold'), url('../fonts/NotoSerifTC-Bold.otf') format('opentype'), url('../fonts/SourceHanSerifTC-Bold.otf') format('opentype');
+    font-display: swap;
+}
+
+/* 備用開源中文字體 */
+@font-face {
+    font-family: 'Noto Serif CJK TC';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Noto Serif CJK TC Regular'), url('../fonts/NotoSerifCJKtc-Regular.otf') format('opentype');
+    font-display: swap;
+}
+
+/* 全局字體設置 */
+body, .card, p, span, div, li, td, th {
+    font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'PMingLiU', 'MingLiU', 'Songti TC', serif;
+}
+
+/* 標題設置 */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+    font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'PMingLiU', 'MingLiU', 'Songti TC', serif;
+    font-weight: 600;
+}
+
+/* 導航菜單 */
+.navbar-brand, .nav-link {
+    font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'PMingLiU', 'MingLiU', 'Songti TC', serif;
+    font-weight: 500;
+}
+
+/* 按鈕和輸入元素保持使用無襯線字體，以確保良好的可讀性 */
+.btn, button, input, select, textarea, .form-control {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* 標籤 */
+.badge {
+    font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'PMingLiU', 'MingLiU', 'Songti TC', serif;
+    font-weight: 500;
+}
+
+/* 表格 */
+.table {
+    font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'PMingLiU', 'MingLiU', 'Songti TC', serif;
+}
+
+/* 卡片標題 */
+.card-title, .card-header {
+    font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'PMingLiU', 'MingLiU', 'Songti TC', serif;
+    font-weight: 600;
+}
+
+/* 頁腳 */
+.footer {
+    font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'PMingLiU', 'MingLiU', 'Songti TC', serif;
+}
+
+/* 警告和提示元素 */
+.alert {
+    font-family: 'Noto Serif TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'PMingLiU', 'MingLiU', 'Songti TC', serif;
+}
+
+/* 確保中文字體在所有字重下正確顯示 */
+.font-weight-light, .fw-light {
+    font-weight: 300;
+}
+
+.font-weight-normal, .fw-normal {
+    font-weight: 400;
+}
+
+.font-weight-bold, .fw-bold {
+    font-weight: 700;
+}
+
+/* 優化字體渲染 */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}

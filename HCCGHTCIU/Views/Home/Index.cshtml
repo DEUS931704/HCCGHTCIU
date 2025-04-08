@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "首頁";
+}
+
+<div class="text-center">
+    <h1 class="display-4">鏈上刑警</h1>
+    <p class="lead">網絡安全與區塊鏈調查工具</p>
+
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">IP查詢</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">查詢IP地址的詳細資訊，包括ISP、位置、VPN使用狀況和安全評估。</p>
+                    <a asp-action="IpLookup" class="btn btn-outline-primary">前往查詢</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">區塊鏈分析</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">區塊鏈交易分析與追蹤工具，追溯交易路徑和關聯分析。</p>
+                    <a asp-action="Blockchain" class="btn btn-outline-info">前往分析</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">管理員入口</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">管理系統資料和設置，僅限授權人員使用。</p>
+                    <a asp-action="AdminLogin" class="btn btn-outline-secondary">管理員登入</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

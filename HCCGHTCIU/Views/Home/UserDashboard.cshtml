@@ -1,0 +1,135 @@
+﻿@{
+    ViewData["Title"] = "用戶儀表板";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-4">歡迎使用鏈上刑警系統</h1>
+            <p class="lead">選擇下方功能開始您的調查工作</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <form asp-action="Logout" method="post" class="mt-2">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-box-arrow-right me-1"></i> 登出系統
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-search me-2"></i>IP 查詢</h5>
+                </div>
+                <div class="card-body">
+                    <p>查詢 IP 地址的詳細資訊，包括地理位置、ISP 提供商、VPN 狀態及威脅評估</p>
+                    <div class="d-grid gap-2">
+                        <a asp-action="IpLookup" class="btn btn-primary">
+                            <i class="bi bi-arrow-right-circle me-1"></i> 開始查詢 IP
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">查詢任何公網 IP 地址，包括 IPv4 和 IPv6</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-currency-bitcoin me-2"></i>區塊鏈分析</h5>
+                </div>
+                <div class="card-body">
+                    <p>分析虛擬貨幣交易和地址，追蹤資金流向，識別關聯地址和潛在犯罪活動</p>
+                    <div class="d-grid gap-2">
+                        <a asp-action="Blockchain" class="btn btn-info">
+                            <i class="bi bi-arrow-right-circle me-1"></i> 開始區塊鏈分析
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">支援多種主流區塊鏈，包括比特幣、以太坊等</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>系統使用說明</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="accordionHelp">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    如何使用 IP 查詢功能？
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionHelp">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li>點擊「開始查詢 IP」按鈕進入查詢介面</li>
+                                        <li>在輸入框中輸入想查詢的 IP 地址（如 8.8.8.8）</li>
+                                        <li>點擊查詢按鈕等待結果</li>
+                                        <li>系統將顯示該 IP 的詳細資訊，包括地理位置、ISP 和威脅評估</li>
+                                    </ol>
+                                    <p>
+                                        <strong>提示：</strong>留空查詢框將自動查詢您當前使用的 IP 地址
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    如何使用區塊鏈分析功能？
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionHelp">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li>點擊「開始區塊鏈分析」按鈕進入分析介面</li>
+                                        <li>選擇想要分析的區塊鏈類型（目前支援比特幣和以太坊）</li>
+                                        <li>輸入交易 ID 或錢包地址進行查詢</li>
+                                        <li>系統將顯示交易詳情、資金流向和相關地址</li>
+                                    </ol>
+                                    <p>
+                                        <strong>注意：</strong>目前此功能正在開發中，將陸續開放更多功能
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    如何獲取更多幫助？
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionHelp">
+                                <div class="accordion-body">
+                                    <p>
+                                        若您在使用過程中遇到任何問題，請聯繫系統管理員或技術支援：
+                                    </p>
+                                    <ul>
+                                        <li>技術支援信箱：413682@ems.hccg.gov.tw</li>
+                                        <li>系統服務專線：03-5262916</li>
+                                    </ul>
+                                    <p>
+                                        <strong>辦公時間：</strong>週一至週五 09:00-17:00（國定假日除外）
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+1	中華電信	Chunghwa Telecom
+2	教育部	Ministry of Education
+3	速博網路	PAGIC Net
+4	精誠資訊	Systex Cprporation
+5	麥凱電信	Mackay Telecommunications
+6	太乙科技	Pacific Resources Technology
+7	遠傳電信	Far EasTone Telecommunication
+8	台灣數網	SaveCom International
+9	訊碟科技	Goldsun Computer & Communication
+10	和宇寬頻網路	KGEX.COM
+11	得利科技	TISNet Technology
+12	新世紀資通	New Century InfoComm
+13	新亞網路科技	New Silkera Network
+14	台灣固網	Taiwan Fixed Network
+15	統一資訊	President Information
+16	數位聯合	DWINS Digital Scrvice
+17	台灣寬頻通訊	Taiwan Broadband Communications
+18	台灣索尼網路	Sony Network Taiwan
+19	台灣基礎開發科技	Taiwan Infrastructure Technology
+20	中嘉和網	Koos Broadband Telecom
+21	世新有線電視	CYC Cable Television
+22	大台北寬頻網路	Great Taipei Broadband
+23	網際網路系統	EDTNS-NET
+24	數位通國際網路	eASPNet Taiwan
+25	大大寬頻	Araedis Broadband
+26	全曜科技	B-WIZ Technology
+27	台固媒體	Taiwan Fixed Network
+28	國研院國家高速網路與計算中心	National Applied Research Laboratories
+29	中嘉寬頻	KE-ing
+30	亞太寬頻	Formosa Network
+31	台灣大哥大	Taiwan Mobile
+32	北健有線電視	T.Y. Cable
+33	凱擘	kbro
+34	東豐科技	DongFong Technology
+35	全盈科技	Chuan Chan
+36	大台中數位有線電視	VEE TIME
+37	洄瀾有線電視	Hualien CATV
+38	大新店民主有線電視	Cable-giant Catv
+39	神通資訊科技	MiTAC Information Technology
+40	聯科科技	Unionisme Tech.
+41	和記環球電訊	HGC Global Communications(Taiwan)
+42	南國有線電視	NAN-KUO CATV
+43	超羿網際網路國際	Chaoyu Internetwork lnternational
+44	是方電訊	TWT Communication
+45	台灣智慧光網	Taiwan Intelligent Fiber Optic Network
+46	是方電訊	Chief Telecom
+47	弘基科技	HongJay	
+48	新彰數位有線電視	New Changhua Digital Cable TV
+49	新永安有線電視	Hsin Yeong An Cable TV
+50	全國數位有線電視	Digidom CableTV
+51	三大有線電視股份有限公司	San Da CableTV
+52	數位發展部	Ministry of Digital Affairs
+53	台灣恩悌悌系統股份有限公司	NTT TAIWAN SOLUTIONS LIMITED
+54	新加坡第一線資訊科技有限公司台灣分公司	Diyixian
+55	台灣大寬頻	TWN Broadband

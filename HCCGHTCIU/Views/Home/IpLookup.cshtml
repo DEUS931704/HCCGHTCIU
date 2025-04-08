@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "IP查詢";
+}
+
+<div class="text-center">
+    <h1 class="display-4">IP地址查詢工具</h1>
+    <p>輸入IP地址以獲取詳細資訊、ISP、VPN狀態與威脅分析</p>
+
+    <!-- 查詢表單，使用柵格系統居中 -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-6">
+            <!-- 表單提交到 Lookup 動作 -->
+            <form asp-action="Lookup" method="post">
+                <!-- 反CSRF令牌 -->
+                @Html.AntiForgeryToken()
+
+                <!-- 輸入組合 -->
+                <div class="input-group mb-3">
+                    <input type="text" name="ipAddress" class="form-control" placeholder="輸入IP地址 (例如: 8.8.8.8)" aria-label="IP地址">
+                    <button class="btn btn-primary" type="submit">查詢</button>
+                </div>
+                <!-- 提示訊息 -->
+                <div class="text-muted">
+                    <small>留空以查詢您當前的IP地址</small>
+                </div>
+
+                <!-- 驗證錯誤顯示 -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger mt-3">
+                        <ul class="mb-0 pl-3">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </form>
+        </div>
+    </div>
+
+    <!-- 功能說明區域 -->
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card mb-3 h-100">
+                <div class="card-body">
+                    <i class="bi bi-geo-alt text-primary" style="font-size: 2rem;"></i>
+                    <h5 class="card-title mt-3">地理位置追踪</h5>
+                    <p class="card-text">精確定位IP地址的國家、城市和區域等地理信息。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3 h-100">
+                <div class="card-body">
+                    <i class="bi bi-shield-check text-primary" style="font-size: 2rem;"></i>
+                    <h5 class="card-title mt-3">VPN檢測</h5>
+                    <p class="card-text">識別IP是否來自VPN、代理或匿名網絡，提供服務商信息。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3 h-100">
+                <div class="card-body">
+                    <i class="bi bi-exclamation-triangle text-primary" style="font-size: 2rem;"></i>
+                    <h5 class="card-title mt-3">威脅評估</h5>
+                    <p class="card-text">分析IP的安全風險級別，檢測是否與惡意活動相關。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

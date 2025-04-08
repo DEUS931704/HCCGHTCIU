@@ -1,0 +1,88 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "登入";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center mb-0">鏈上刑警 系統登入</h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["LoginError"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @TempData["LoginError"]
+                        </div>
+                    }
+
+                    <form asp-action="Login" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">帳號</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                <input type="text" name="username" class="form-control" placeholder="請輸入用戶名" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">密碼</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                <input type="password" name="password" class="form-control" placeholder="請輸入密碼" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">登入</button>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <a asp-action="Privacy" class="text-muted">隱私政策</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">系統功能介紹</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h4><i class="bi bi-search me-2"></i>IP 地址查詢</h4>
+                        <p>提供全面的 IP 地址分析功能，包括：</p>
+                        <ul>
+                            <li>地理位置追踪 - 精確定位 IP 的國家、城市和區域</li>
+                            <li>ISP 識別 - 提供中英文對照的網路服務提供商信息</li>
+                            <li>VPN/代理檢測 - 識別是否使用 VPN 或代理服務</li>
+                            <li>風險評估 - 分析 IP 地址的潛在威脅和風險等級</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4><i class="bi bi-currency-bitcoin me-2"></i>區塊鏈分析工具</h4>
+                        <p>先進的區塊鏈追蹤和分析功能，協助偵查人員：</p>
+                        <ul>
+                            <li>交易追踪 - 追蹤虛擬貨幣交易路徑</li>
+                            <li>資金流向 - 視覺化呈現資金流向圖表</li>
+                            <li>關聯分析 - 探索地址之間的潛在關聯</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4><i class="bi bi-shield-check me-2"></i>系統特點</h4>
+                        <p>專為執法人員設計的高安全性系統：</p>
+                        <ul>
+                            <li>高效查詢 - 快速處理大量 IP 和區塊鏈數據</li>
+                            <li>完整記錄 - 詳細的查詢日誌，便於追蹤和審計</li>
+                            <li>用戶管理 - 多層級的用戶權限控制</li>
+                            <li>數據安全 - 符合資安規範的加密和保護機制</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
