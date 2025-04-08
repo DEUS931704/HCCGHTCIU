@@ -1,17 +1,17 @@
 1	中華電信	Chunghwa Telecom
-2	教育部	Ministry of Education
-3	速博網路	PAGIC Net
-4	精誠資訊	Systex Cprporation
-5	麥凱電信	Mackay Telecommunications
-6	太乙科技	Pacific Resources Technology
-7	遠傳電信	Far EasTone Telecommunication
-8	台灣數網	SaveCom International
+2	臺灣學術網路(教育部)	Taiwan Academic Network
+3	宏碁雲架構	Acer e-Enabling Data Center
+4	精誠資訊	Systex Corporation
+5	麥凱電信	Mackay Telecommunication
+6	太乙科技-已廢止	Pacific Resources Technology Corp.
+7	遠傳電信	FarEasTone
+8	宏遠電訊	SaveCom Internation
 9	訊碟科技	Goldsun Computer & Communication
 10	和宇寬頻網路	KGEX.COM
 11	得利科技	TISNet Technology
 12	新世紀資通	New Century InfoComm
 13	新亞網路科技	New Silkera Network
-14	台灣固網	Taiwan Fixed Network
+14	台灣大寬頻	TWN Broadband
 15	統一資訊	President Information
 16	數位聯合	DWINS Digital Scrvice
 17	台灣寬頻通訊	Taiwan Broadband Communications
@@ -24,7 +24,7 @@
 24	數位通國際網路	eASPNet Taiwan
 25	大大寬頻	Araedis Broadband
 26	全曜科技	B-WIZ Technology
-27	台固媒體	Taiwan Fixed Network
+27	太碁全球通訊(宏碁)	PAGIC.netINC.
 28	國研院國家高速網路與計算中心	National Applied Research Laboratories
 29	中嘉寬頻	KE-ing
 30	亞太寬頻	Formosa Network
@@ -53,3 +53,4 @@
 53	台灣恩悌悌系統股份有限公司	NTT TAIWAN SOLUTIONS LIMITED
 54	新加坡第一線資訊科技有限公司台灣分公司	Diyixian
 55	台灣大寬頻	TWN Broadband
+56	中華民國網際網路交換中心(宏遠電訊)	Taiwan Network Access Point
